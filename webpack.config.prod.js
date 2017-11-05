@@ -1,12 +1,14 @@
-import path from 'path';
-import nodeExternals from 'webpack-node-externals';
+const path = require('path');
+const nodeExternals = require('webpack-node-externals');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 
 const client = {
   entry: {
     js: './src/app-client.js',
   },
   output: {
-    path: path.join(__dirname, 'src', 'static', 'js'),
+    path: path.join(__dirname, 'dist', 'static', 'js'),
     filename: 'bundle.js',
   },
   module: {
@@ -27,17 +29,17 @@ const server = {
   node: {
     __dirname: false,
   },
+  externals: [nodeExternals({
+    modulesFromFile: true,
+  })],
   entry: {
     js: './src/server.js',
   },
   output: {
-    path: path.join(__dirname, 'src'),
+    path: path.join(__dirname, 'dist'),
     filename: 'server-es5.js',
     libraryTarget: 'commonjs2',
   },
-  externals: [nodeExternals({
-    modulesFromFile: true,
-  })],
   module: {
     rules: [
       {
@@ -49,6 +51,16 @@ const server = {
       },
     ],
   },
+  plugins: [
+    new CopyWebpackPlugin([
+      { from: 'src/static', to: 'static/' },
+      { from: 'src/views', to: 'views/' },
+    ],{
+      ignore: [
+        { glob: '.gitkeep' },
+      ],
+    }),
+  ],
 };
 
-export default [client, server];
+module.exports = [client, server];
